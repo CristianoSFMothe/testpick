@@ -24,6 +24,7 @@ import {
   FormMessage,
 } from "./ui/form";
 import { FileSymlink, Loader2 } from "lucide-react";
+import { cn } from "../_lib/utils";
 
 const frameworks = [
   "Cypress",
@@ -109,7 +110,12 @@ export default function Home() {
 
   return (
     <main className="min-h-screen flex items-start justify-center pt-5 bg-gray-200">
-      <Card className="w-[700px] flex flex-col items-center justify-center p-6 rounded-2xl shadow-2xl border-2">
+      <Card
+        className={cn(
+          "w-[700px] flex flex-col items-center",
+          "justify-center p-6 rounded-2xl shadow-2xl border-2",
+        )}
+      >
         <CardHeader className="flex flex-col items-center gap-2">
           <h1 className="text-4xl font-bold">Test Pick</h1>
           <CardDescription>
@@ -135,11 +141,18 @@ export default function Home() {
                         value={field.value}
                       >
                         <SelectTrigger className="w-full h-12">
-                          <SelectValue placeholder="Selecione um framework" />
+                          <SelectValue
+                            placeholder="Selecione um framework"
+                            data-slot={field.value}
+                          />
                         </SelectTrigger>
                         <SelectContent>
                           {frameworks.map((framework, index) => (
-                            <SelectItem key={index} value={framework}>
+                            <SelectItem
+                              key={index}
+                              value={framework}
+                              data-testid={field.value}
+                            >
                               {framework}
                             </SelectItem>
                           ))}
@@ -158,7 +171,12 @@ export default function Home() {
                     <textarea
                       {...register("description")}
                       placeholder="Digite uma descrição"
-                      className="w-full p-3 border border-gray-300 rounded-md text-md h-28 resize-none"
+                      className={cn(
+                        "w-full text-md h-28 p-3 border",
+                        "border-gray-300 rounded-md resize-none description",
+                      )}
+                      id="description"
+                      data-testid="description"
                     />
                   </FormControl>
                   <FormMessage>{errors.description?.message}</FormMessage>
@@ -170,7 +188,9 @@ export default function Home() {
                     <Input
                       {...register("name")}
                       placeholder="Digite seu nome"
-                      className="h-12"
+                      className="h-12 name"
+                      id="name"
+                      data-testid="name"
                     />
                   </FormControl>
                   <FormMessage>{errors.name?.message}</FormMessage>
@@ -183,7 +203,9 @@ export default function Home() {
                       type="email"
                       {...register("email")}
                       placeholder="Digite seu e-mail"
-                      className="h-12"
+                      className="h-12 email"
+                      id="email"
+                      data-testid="email"
                     />
                   </FormControl>
                   <FormMessage>{errors.email?.message}</FormMessage>
@@ -195,7 +217,9 @@ export default function Home() {
                     <Input
                       {...register("phone")}
                       placeholder="Digite seu telefone"
-                      className="h-12"
+                      className="h-12 phone"
+                      id="phone"
+                      data-testid="phone"
                     />
                   </FormControl>
                   <FormMessage>{errors.phone?.message}</FormMessage>
@@ -223,7 +247,12 @@ export default function Home() {
           </Form>
 
           {message && (
-            <p className="mt-4 text-center text-sm text-gray-600">{message}</p>
+            <p
+              className="mt-4 text-center text-sm text-gray-600"
+              data-testid="message"
+            >
+              {message}
+            </p>
           )}
         </CardContent>
       </Card>

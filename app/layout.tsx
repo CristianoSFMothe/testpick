@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Test Pike",
     description: "Escolha seu framework de automação preferido.",
-    url: "https://www.seusite.com",
+    url: "https://qa-test-pick.vercel.app/",
     siteName: "Test Pike",
     images: [
       {
