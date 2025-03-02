@@ -1,5 +1,10 @@
 "use client";
 
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { formSchema, FormData } from "@/app/_utils/schema";
+
 import {
   Card,
   CardContent,
@@ -14,11 +19,7 @@ import {
   SelectValue,
 } from "./_components/ui/select";
 import { Input } from "./_components/ui/input";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "./_components/ui/button";
-import { useState } from "react";
 import {
   Form,
   FormControl,
@@ -27,49 +28,30 @@ import {
   FormLabel,
   FormMessage,
 } from "./_components/ui/form";
-import { cn } from "./_lib/utils";
 
 const frameworks = [
-  { name: "Cypress" },
-  { name: "Selenium" },
-  { name: "Robot Framework" },
-  { name: "Playwright" },
-  { name: "Jest" },
-  { name: "Mocha" },
-  { name: "TestCafe" },
-  { name: "Puppeteer" },
-  { name: "Appium" },
-  { name: "Katalon Studio" },
-  { name: "JUnit" },
-  { name: "Capybara" },
-  { name: "Sikuli" },
-  { name: "TestNG" },
-  { name: "Karate Framework" },
+  "Cypress",
+  "Selenium",
+  "Robot Framework",
+  "Playwright",
+  "Jest",
+  "Mocha",
+  "TestCafe",
+  "Puppeteer",
+  "Appium",
+  "Katalon Studio",
+  "JUnit",
+  "Capybara",
+  "Sikuli",
+  "TestNG",
+  "Karate Framework",
 ];
-
-const schema = z.object({
-  framework: z.string().min(1, "Selecione um framework"),
-  name: z.string().min(1, "O campo nome é obrigatório"),
-  email: z.string().email("E-mail inválido").min(1, "E-mail é obrigatório"),
-  phone: z
-    .string()
-    .min(10, "Telefone deve ter pelo menos 10 dígitos")
-    .max(15, "Telefone não pode ter mais de 15 dígitos")
-    .or(z.literal(""))
-    .optional(),
-  description: z
-    .string()
-    .min(10, "A descrição deve ter pelo menos 10 caracteres")
-    .max(1500, "A descrição não pode ter mais de 1500 caracteres"),
-});
-
-type FormData = z.infer<typeof schema>;
 
 export default function Home() {
   const [message, setMessage] = useState("");
 
   const form = useForm<FormData>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(formSchema),
     defaultValues: {
       framework: "",
       name: "",
@@ -84,6 +66,7 @@ export default function Home() {
     handleSubmit,
     control,
     reset,
+    setError,
     formState: { errors },
   } = form;
 
@@ -98,13 +81,20 @@ export default function Home() {
       const responseData = await response.json();
 
       if (response.ok) {
-        setMessage("Formulário enviado com sucesso!");
-        setTimeout(() => {
-          reset();
-          setMessage("");
-        }, 3000);
+        setMessage(responseData.message || "Formulário enviado com sucesso!");
+        reset();
       } else {
         setMessage(responseData.message || "Erro ao enviar formulário");
+
+        if (responseData.errors) {
+          Object.entries(responseData.errors).forEach(
+            ([field, errorMessages]) => {
+              setError(field as keyof FormData, {
+                message: (errorMessages as string[])[0],
+              });
+            },
+          );
+        }
       }
     } catch (error) {
       console.error("Erro ao enviar:", error);
@@ -113,44 +103,39 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen flex items-start justify-center pt-20 px-4 bg-gray-200">
-      <Card
-        className={cn(
-          "w-full max-w-lg flex flex-col items-center",
-          "justify-center p-6 rounded-2xl shadow-2xl border-2",
-        )}
-      >
-        <CardHeader className="flex flex-col items-center gap-4">
-          <h1 className="text-3xl font-bold text-gray-800">Test Pick</h1>
+    <main className="min-h-screen flex items-start justify-center pt-20 bg-gray-200">
+      <Card className="w-[700px] flex flex-col items-center justify-center p-6 rounded-2xl shadow-2xl border-2">
+        <CardHeader className="flex flex-col items-center gap-6">
+          <h1 className="text-4xl font-bold">Test Pick</h1>
           <CardDescription>
-            <p className="text-md text-gray-600 text-center">
-              Escolha qual framework de automação você mais gosta de usar
+            <p className="text-lg">
+              Escolha qual o framework para automação você mais gosta de
+              utilizar
             </p>
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="w-full">
+        <CardContent>
           <Form {...form}>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div className="grid w-full gap-4">
-                {/* Framework */}
+              <div className="grid w-full items-center gap-6">
                 <FormField
                   control={control}
                   name="framework"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-md">Framework</FormLabel>
+                      <FormLabel>Framework</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         value={field.value || ""}
                       >
-                        <SelectTrigger className="w-full h-10 border border-gray-300 rounded-md px-3 text-md">
+                        <SelectTrigger className="w-full h-12">
                           <SelectValue placeholder="Selecione um framework" />
                         </SelectTrigger>
                         <SelectContent>
                           {frameworks.map((framework, index) => (
-                            <SelectItem key={index} value={framework.name}>
-                              {framework.name}
+                            <SelectItem key={index} value={framework}>
+                              {framework}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -162,7 +147,7 @@ export default function Home() {
 
                 <FormItem>
                   <FormLabel className="text-md">
-                    Descreva os motivos pelos quais você escolheu este framework
+                    Explique por que você prefere este framework
                   </FormLabel>
                   <FormControl>
                     <textarea
@@ -175,43 +160,43 @@ export default function Home() {
                 </FormItem>
 
                 <FormItem>
-                  <FormLabel className="text-md">Nome</FormLabel>
+                  <FormLabel>Nome</FormLabel>
                   <FormControl>
                     <Input
                       {...register("name")}
                       placeholder="Digite seu nome"
-                      className="w-full h-10 border border-gray-300 rounded-md px-3 text-md"
+                      className="h-12"
                     />
                   </FormControl>
                   <FormMessage>{errors.name?.message}</FormMessage>
                 </FormItem>
 
                 <FormItem>
-                  <FormLabel className="text-md">Email</FormLabel>
+                  <FormLabel>Email</FormLabel>
                   <FormControl>
                     <Input
                       type="email"
                       {...register("email")}
                       placeholder="Digite seu e-mail"
-                      className="w-full h-10 border border-gray-300 rounded-md px-3 text-md"
+                      className="h-12"
                     />
                   </FormControl>
                   <FormMessage>{errors.email?.message}</FormMessage>
                 </FormItem>
 
                 <FormItem>
-                  <FormLabel className="text-md">Telefone</FormLabel>
+                  <FormLabel>Telefone</FormLabel>
                   <FormControl>
                     <Input
                       {...register("phone")}
                       placeholder="Digite seu telefone"
-                      className="w-full h-10 border border-gray-300 rounded-md px-3 text-md"
+                      className="h-12"
                     />
                   </FormControl>
                   <FormMessage>{errors.phone?.message}</FormMessage>
                 </FormItem>
 
-                <Button type="submit" className="mt-4 w-full h-12 text-md">
+                <Button type="submit" className="mt-4 w-full h-12">
                   Enviar
                 </Button>
               </div>
@@ -219,7 +204,7 @@ export default function Home() {
           </Form>
 
           {message && (
-            <p className="mt-4 text-center text-md text-gray-600">{message}</p>
+            <p className="mt-4 text-center text-sm text-gray-600">{message}</p>
           )}
         </CardContent>
       </Card>

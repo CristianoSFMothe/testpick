@@ -1,30 +1,14 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
-import { z } from "zod";
+import { formSchema } from "@/app/_utils/schema";
 
 const prisma = new PrismaClient();
-
-const schema = z.object({
-  framework: z.string().min(1, "Selecione um framework"),
-  name: z.string().min(1, "O campo nome é obrigatório"),
-  email: z.string().email("E-mail inválido").min(1, "E-mail é obrigatório"),
-  phone: z
-    .string()
-    .min(10, "Telefone deve ter pelo menos 10 dígitos")
-    .max(15, "Telefone não pode ter mais de 15 dígitos")
-    .or(z.literal(""))
-    .optional(),
-  description: z
-    .string()
-    .min(10, "Descrição deve ter pelo menos 10 caracteres")
-    .max(1500, "Descrição não pode ter mais de 1500 caracteres"),
-});
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
+    const validatedData = formSchema.safeParse(body);
 
-    const validatedData = schema.safeParse(body);
     if (!validatedData.success) {
       console.error("Erro de validação:", validatedData.error.format());
       return NextResponse.json(
@@ -35,16 +19,14 @@ export async function POST(req: Request) {
 
     const { framework, name, email, phone, description } = validatedData.data;
 
-    const userData = {
-      framework,
-      name,
-      email,
-      phone: phone === "" ? null : phone,
-      description,
-    };
-
     const user = await prisma.user.create({
-      data: userData,
+      data: {
+        framework,
+        name,
+        email,
+        phone: phone === "" ? null : phone,
+        description,
+      },
     });
 
     return NextResponse.json({
