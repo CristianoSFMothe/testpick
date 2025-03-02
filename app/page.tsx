@@ -6,8 +6,6 @@ import {
   CardDescription,
   CardHeader,
 } from "./_components/ui/card";
-
-import { Label } from "./_components/ui/label";
 import {
   Select,
   SelectContent,
@@ -20,9 +18,18 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "./_components/ui/button";
-import { FileInput } from "lucide-react";
+import { useState } from "react";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "./_components/ui/form";
+import { cn } from "./_lib/utils";
 
-const framework = [
+const frameworks = [
   { name: "Cypress" },
   { name: "Selenium" },
   { name: "Robot Framework" },
@@ -48,117 +55,172 @@ const schema = z.object({
     .string()
     .min(10, "Telefone deve ter pelo menos 10 dígitos")
     .max(15, "Telefone não pode ter mais de 15 dígitos")
+    .or(z.literal(""))
     .optional(),
+  description: z
+    .string()
+    .min(10, "A descrição deve ter pelo menos 10 caracteres")
+    .max(1500, "A descrição não pode ter mais de 1500 caracteres"),
 });
 
+type FormData = z.infer<typeof schema>;
+
 export default function Home() {
+  const [message, setMessage] = useState("");
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      framework: "",
+      name: "",
+      email: "",
+      phone: "",
+      description: "",
+    },
+  });
+
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    control,
     reset,
-    setValue,
-  } = useForm({
-    resolver: zodResolver(schema),
-  });
+    formState: { errors },
+  } = form;
 
-  const onSubmit = (data: any) => {
-    console.log("Adicionado com sucesso", data);
-    reset();
+  const onSubmit = async (data: FormData) => {
+    try {
+      const response = await fetch("/api/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      const responseData = await response.json();
+
+      if (response.ok) {
+        setMessage("Formulário enviado com sucesso!");
+        setTimeout(() => {
+          reset();
+          setMessage("");
+        }, 3000);
+      } else {
+        setMessage(responseData.message || "Erro ao enviar formulário");
+      }
+    } catch (error) {
+      console.error("Erro ao enviar:", error);
+      setMessage("Erro ao enviar formulário");
+    }
   };
 
   return (
-    <main className="min-h-screen flex items-start justify-center pt-20 bg-gray-200">
-      <Card className="w-[1024px] flex flex-col items-center justify-center p-6 rounded-2xl shadow-2xl border-2">
-        <CardHeader className="flex flex-col items-center gap-6">
-          <h1 className="text-4xl font-bold">Test Pick</h1>
+    <main className="min-h-screen flex items-start justify-center pt-20 px-4 bg-gray-200">
+      <Card
+        className={cn(
+          "w-full max-w-lg flex flex-col items-center",
+          "justify-center p-6 rounded-2xl shadow-2xl border-2",
+        )}
+      >
+        <CardHeader className="flex flex-col items-center gap-4">
+          <h1 className="text-3xl font-bold text-gray-800">Test Pick</h1>
           <CardDescription>
-            <p className="text-lg">
-              Escolha qual o framework para automação você mais gosta de
-              utilizar
+            <p className="text-md text-gray-600 text-center">
+              Escolha qual framework de automação você mais gosta de usar
             </p>
           </CardDescription>
         </CardHeader>
 
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="grid w-full items-center gap-6">
-              <div className="flex flex-col space-y-1.5">
-                <Label
-                  htmlFor="framework"
-                  className="items-center flex justify-center"
-                >
-                  Framework
-                </Label>
-                <Select onValueChange={(value) => setValue("framework", value)}>
-                  <SelectTrigger id="framework" className="w-55">
-                    <SelectValue placeholder="Selecione o framework" />
-                  </SelectTrigger>
-                  <SelectContent position="popper">
-                    {framework.map((item, index) => (
-                      <SelectItem key={index} value={item.name}>
-                        {item.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.framework?.message && (
-                  <p className="text-red-500 text-xs text-center">
-                    {errors.framework.message as string}
-                  </p>
-                )}
+        <CardContent className="w-full">
+          <Form {...form}>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <div className="grid w-full gap-4">
+                {/* Framework */}
+                <FormField
+                  control={control}
+                  name="framework"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-md">Framework</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value || ""}
+                      >
+                        <SelectTrigger className="w-full h-10 border border-gray-300 rounded-md px-3 text-md">
+                          <SelectValue placeholder="Selecione um framework" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {frameworks.map((framework, index) => (
+                            <SelectItem key={index} value={framework.name}>
+                              {framework.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage>{errors.framework?.message}</FormMessage>
+                    </FormItem>
+                  )}
+                />
+
+                <FormItem>
+                  <FormLabel className="text-md">
+                    Descreva os motivos pelos quais você escolheu este framework
+                  </FormLabel>
+                  <FormControl>
+                    <textarea
+                      {...register("description")}
+                      placeholder="Digite uma descrição"
+                      className="w-full p-3 border border-gray-300 rounded-md text-md h-28 resize-none"
+                    />
+                  </FormControl>
+                  <FormMessage>{errors.description?.message}</FormMessage>
+                </FormItem>
+
+                <FormItem>
+                  <FormLabel className="text-md">Nome</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...register("name")}
+                      placeholder="Digite seu nome"
+                      className="w-full h-10 border border-gray-300 rounded-md px-3 text-md"
+                    />
+                  </FormControl>
+                  <FormMessage>{errors.name?.message}</FormMessage>
+                </FormItem>
+
+                <FormItem>
+                  <FormLabel className="text-md">Email</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="email"
+                      {...register("email")}
+                      placeholder="Digite seu e-mail"
+                      className="w-full h-10 border border-gray-300 rounded-md px-3 text-md"
+                    />
+                  </FormControl>
+                  <FormMessage>{errors.email?.message}</FormMessage>
+                </FormItem>
+
+                <FormItem>
+                  <FormLabel className="text-md">Telefone</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...register("phone")}
+                      placeholder="Digite seu telefone"
+                      className="w-full h-10 border border-gray-300 rounded-md px-3 text-md"
+                    />
+                  </FormControl>
+                  <FormMessage>{errors.phone?.message}</FormMessage>
+                </FormItem>
+
+                <Button type="submit" className="mt-4 w-full h-12 text-md">
+                  Enviar
+                </Button>
               </div>
-            </div>
+            </form>
+          </Form>
 
-            <div className="flex flex-col mt-4 mb-4 gap-4 items-center justify-center">
-              <Label htmlFor="name">Nome</Label>
-              <Input
-                id="name"
-                type="text"
-                placeholder="Informe seu nome"
-                {...register("name")}
-              />
-              {errors.name && (
-                <p className="text-red-500 text-xs text-center">
-                  {errors.name.message}
-                </p>
-              )}
-
-              <Label htmlFor="email">E-mail</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="Informe seu e-mail"
-                {...register("email")}
-              />
-              {errors.email && (
-                <p className="text-red-500 text-xs text-center">
-                  {errors.email.message}
-                </p>
-              )}
-
-              <Label htmlFor="phone">Telefone</Label>
-              <Input
-                id="phone"
-                type="number"
-                placeholder="Informe seu telefone"
-                {...register("phone")}
-              />
-              {errors.phone && (
-                <p className="text-red-500 text-xs text-center">
-                  {errors.phone.message}
-                </p>
-              )}
-            </div>
-
-            <Button
-              type="submit"
-              className="w-55 text-2xl h-10 gap-3 flex items-center justify-center"
-            >
-              <FileInput size={24} />
-              Enviar
-            </Button>
-          </form>
+          {message && (
+            <p className="mt-4 text-center text-md text-gray-600">{message}</p>
+          )}
         </CardContent>
       </Card>
     </main>
