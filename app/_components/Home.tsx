@@ -139,11 +139,12 @@ export default function Home() {
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}
-                        data-test="select-framework"
                       >
                         <SelectTrigger
-                          className="w-full h-12"
-                          data-test="select-framework"
+                          className="w-full h-12 select-framework"
+                          data-qa="select-framework"
+                          data-testid="select-framework"
+                          data-test-id="select-framework"
                         >
                           <SelectValue
                             placeholder="Selecione um framework"
@@ -151,11 +152,14 @@ export default function Home() {
                           />
                         </SelectTrigger>
                         <SelectContent>
-                          {frameworks.map((framework, index) => (
+                          {frameworks.map((framework) => (
                             <SelectItem
-                              key={index}
+                              key={framework}
                               value={framework}
-                              data-test={field.value}
+                              data-qa={field.value}
+                              data-testid={field.value}
+                              data-test-id={field.value}
+                              className={field.value}
                             >
                               {framework}
                             </SelectItem>
@@ -180,7 +184,9 @@ export default function Home() {
                         "border-gray-300 rounded-md resize-none description",
                       )}
                       id="description"
-                      data-test="description"
+                      data-qa="description"
+                      data-testid="description"
+                      data-test-id="description"
                     />
                   </FormControl>
                   <FormMessage>{errors.description?.message}</FormMessage>
@@ -194,7 +200,9 @@ export default function Home() {
                       placeholder="Digite seu nome"
                       className="h-12 name"
                       id="name"
-                      data-test="name"
+                      data-qa="name"
+                      data-testid="name"
+                      data-test-id="name"
                     />
                   </FormControl>
                   <FormMessage>{errors.name?.message}</FormMessage>
@@ -209,7 +217,9 @@ export default function Home() {
                       placeholder="Digite seu e-mail"
                       className="h-12 email"
                       id="email"
-                      data-test="email"
+                      data-qa="email"
+                      data-testid="email"
+                      data-test-id="email"
                     />
                   </FormControl>
                   <FormMessage>{errors.email?.message}</FormMessage>
@@ -223,7 +233,9 @@ export default function Home() {
                       placeholder="Digite seu telefone"
                       className="h-12 phone"
                       id="phone"
-                      data-test="phone"
+                      data-qa="phone"
+                      data-testid="phone"
+                      data-test-id="phone"
                     />
                   </FormControl>
                   <FormMessage>{errors.phone?.message}</FormMessage>
@@ -253,7 +265,9 @@ export default function Home() {
           {message && (
             <p
               className="mt-4 text-center text-sm text-gray-600"
-              data-test="message"
+              data-qa="message"
+              data-testid="message"
+              data-test-id="message"
             >
               {message}
             </p>
