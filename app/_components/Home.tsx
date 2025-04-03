@@ -139,8 +139,12 @@ export default function Home() {
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}
+                        data-testid="select-framework"
                       >
-                        <SelectTrigger className="w-full h-12">
+                        <SelectTrigger
+                          className="w-full h-12"
+                          data-testid="select-framework"
+                        >
                           <SelectValue
                             placeholder="Selecione um framework"
                             data-slot={field.value}
