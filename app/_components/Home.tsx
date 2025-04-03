@@ -139,11 +139,11 @@ export default function Home() {
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}
-                        data-testid="select-framework"
+                        data-test="select-framework"
                       >
                         <SelectTrigger
                           className="w-full h-12"
-                          data-testid="select-framework"
+                          data-test="select-framework"
                         >
                           <SelectValue
                             placeholder="Selecione um framework"
@@ -155,7 +155,7 @@ export default function Home() {
                             <SelectItem
                               key={index}
                               value={framework}
-                              data-testid={field.value}
+                              data-test={field.value}
                             >
                               {framework}
                             </SelectItem>
@@ -180,7 +180,7 @@ export default function Home() {
                         "border-gray-300 rounded-md resize-none description",
                       )}
                       id="description"
-                      data-testid="description"
+                      data-test="description"
                     />
                   </FormControl>
                   <FormMessage>{errors.description?.message}</FormMessage>
@@ -194,7 +194,7 @@ export default function Home() {
                       placeholder="Digite seu nome"
                       className="h-12 name"
                       id="name"
-                      data-testid="name"
+                      data-test="name"
                     />
                   </FormControl>
                   <FormMessage>{errors.name?.message}</FormMessage>
@@ -209,7 +209,7 @@ export default function Home() {
                       placeholder="Digite seu e-mail"
                       className="h-12 email"
                       id="email"
-                      data-testid="email"
+                      data-test="email"
                     />
                   </FormControl>
                   <FormMessage>{errors.email?.message}</FormMessage>
@@ -223,7 +223,7 @@ export default function Home() {
                       placeholder="Digite seu telefone"
                       className="h-12 phone"
                       id="phone"
-                      data-testid="phone"
+                      data-test="phone"
                     />
                   </FormControl>
                   <FormMessage>{errors.phone?.message}</FormMessage>
@@ -253,7 +253,7 @@ export default function Home() {
           {message && (
             <p
               className="mt-4 text-center text-sm text-gray-600"
-              data-testid="message"
+              data-test="message"
             >
               {message}
             </p>
